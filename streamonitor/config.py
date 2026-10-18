@@ -3,11 +3,12 @@ import os
 import sys
 import time
 
+from parameters import CONFIG_PATH
 from streamonitor.bot import Bot
 from streamonitor.log import Logger
 
 logger = Logger('[CONFIG]').get_logger()
-config_loc = "config.json"
+config_loc = CONFIG_PATH
 
 
 def load_config():
@@ -15,6 +16,7 @@ def load_config():
         with open(config_loc, "r+") as f:
             return json.load(f)
     except FileNotFoundError:
+        os.makedirs(os.path.dirname(config_loc) or ".", exist_ok=True)
         with open(config_loc, "w+") as f:
             json.dump([], f, indent=4)
             return []
@@ -28,6 +30,7 @@ def load_config():
 
 def save_config(config):
     try:
+        os.makedirs(os.path.dirname(config_loc) or ".", exist_ok=True)
         with open(config_loc, "w+") as f:
             json.dump(config, f, indent=4)
         return True

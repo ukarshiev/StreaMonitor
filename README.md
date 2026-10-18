@@ -99,6 +99,9 @@ Simply start it in the folder with `docker-compose up`.
 
 You can set some parameters in the [parameters.py](parameters.py).
 
+* `STRMNTR_DOWNLOAD_DIR`: Directory for downloaded streams (default: `downloads`).
+* `STRMNTR_CONFIG_PATH`: Path to the configuration JSON file (default: `config.json`); missing parent directories are created automatically.
+
 You also have to add decryption keys yourself for StripChat in the `stripchat_mouflon_keys.json` file.
 
 ## Disclaimer

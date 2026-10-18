@@ -8,6 +8,7 @@ if os.path.exists('.env'):
 
 
 DOWNLOADS_DIR = env.str("STRMNTR_DOWNLOAD_DIR", "downloads")
+CONFIG_PATH = env.str("STRMNTR_CONFIG_PATH", default="config.json")
 MIN_FREE_DISK_PERCENT = env.float("STRMNTR_MIN_FREE_SPACE", 5.0)  # in %
 DEBUG = env.bool("STRMNTR_DEBUG", False)
 
