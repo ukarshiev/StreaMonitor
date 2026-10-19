@@ -115,9 +115,9 @@ class HTTPManager(Manager):
             command = request.args.get("command")
             if command == "reload":
                 # WSGI closes this response after yielding its bytes. Only then
-                # stop ffmpeg and replace this process, preserving its PID.
+                # start shutdown in the background; Docker restarts the process.
                 response = Response("Reloading", mimetype="text/plain")
-                response.call_on_close(self.reload_process)
+                response.call_on_close(self.do_reload)
                 return response
             return self.execCmd(command)
 

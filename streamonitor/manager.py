@@ -1,6 +1,5 @@
 import math
 import os
-import sys
 from threading import Lock
 from logging import INFO, WARN, ERROR
 from threading import Thread
@@ -36,10 +35,12 @@ class Manager(Thread):
                     streamer.join(timeout=120)
                     if streamer.is_alive():
                         self.logger.warning(f'Recorder did not stop within 120 s: {streamer.username}')
-            os.execv(sys.executable, [sys.executable] + sys.argv)
+            # Docker restarts the container with fresh parameters and sockets.
+            os._exit(3)
 
     def do_reload(self, streamer=None, username="", site=""):
-        self.reload_process()
+        Thread(target=self.reload_process, daemon=True).start()
+        return "Reloading"
 
     def execCmd(self, line):
         parts = str(line).split(' ')
