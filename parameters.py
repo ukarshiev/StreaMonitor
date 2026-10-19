@@ -88,3 +88,38 @@ WEB_CONFIRM_DELETES = env.str("STRMNTR_CONFIRM_DEL", "MOBILE")
 # Password for the web server
 # If empty no auth required, else username admin and choosen password
 WEBSERVER_PASSWORD = env.str("STRMNTR_PASSWORD", "admin")
+
+
+def apply_overrides():
+    """Apply the small, validated runtime configuration allowlist."""
+    import json
+    import logging
+    from pathlib import Path
+
+    path = Path(env.str("STRMNTR_OVERRIDES_PATH", str(Path(CONFIG_PATH).with_name("overrides.json"))))
+    try:
+        values = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(values, dict):
+            raise ValueError("expected object")
+    except (OSError, ValueError):
+        logging.warning("Recorder overrides unavailable or invalid; using environment")
+        return
+    validators = {
+        "SEGMENT_TIME": lambda v: type(v) is int and v > 0,
+        "WANTED_RESOLUTION": lambda v: type(v) is int and v > 0,
+        "RESOLUTION_PREF": lambda v: isinstance(v, str) and v in {
+            "closest", "exact", "exact_or_least_higher", "exact_or_highest_lower"},
+        "MIN_FREE_DISK_PERCENT": lambda v: type(v) in (int, float) and 0 <= v <= 100,
+        "CONTAINER": lambda v: isinstance(v, str) and v in {"mkv", "mp4"},
+    }
+    for key, value in values.items():
+        if key not in validators:
+            continue
+        if not validators[key](value):
+            logging.warning("Ignoring invalid recorder override %s", key)
+            continue
+        target = "WANTED_RESOLUTION_PREFERENCE" if key == "RESOLUTION_PREF" else key
+        globals()[target] = value
+
+
+apply_overrides()

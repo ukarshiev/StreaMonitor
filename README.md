@@ -111,3 +111,7 @@ Most (if not every) streamers disallow recording their shows. Please respect the
 If you don't, and you record them despite this request, please don't ever publish or share any recordings. \
 If you either record or share the recorded shows, you might be legally punished. \
 Also, please don't use this tool for monetization in any way.
+# Переопределения DownloadAll
+
+`STRMNTR_OVERRIDES_PATH` задаёт JSON с параметрами записи; по умолчанию `overrides.json` рядом с `config.json`.
+Авторизованный `GET /api/command?command=reload` отвечает `Reloading`, закрывает записи и перезапускает процесс с перечитыванием параметров.

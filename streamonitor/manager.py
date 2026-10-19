@@ -1,4 +1,7 @@
 import math
+import os
+import sys
+from threading import Lock
 from logging import INFO, WARN, ERROR
 from threading import Thread
 from termcolor import colored
@@ -18,6 +21,25 @@ class Manager(Thread):
         self.daemon = True
         self.streamers = streamers
         self.logger = log.Logger("manager")
+        self._reload_lock = Lock()
+
+    def reload_process(self):
+        # Same stop/wait sequence as CleanExit, without registering signals
+        # from the HTTP worker or changing the saved monitoring preferences.
+        with self._reload_lock:
+            for streamer in self.streamers:
+                streamer.quitting = True
+            for streamer in self.streamers:
+                streamer.stop(None, None, True)
+            for streamer in self.streamers:
+                if streamer.is_alive():
+                    streamer.join(timeout=120)
+                    if streamer.is_alive():
+                        self.logger.warning(f'Recorder did not stop within 120 s: {streamer.username}')
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+
+    def do_reload(self, streamer=None, username="", site=""):
+        self.reload_process()
 
     def execCmd(self, line):
         parts = str(line).split(' ')

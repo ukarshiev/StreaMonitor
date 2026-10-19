@@ -112,7 +112,14 @@ class HTTPManager(Manager):
         @app.route('/api/command')
         @login_required
         def execApiCommand():
-            return self.execCmd(request.args.get("command"))
+            command = request.args.get("command")
+            if command == "reload":
+                # WSGI closes this response after yielding its bytes. Only then
+                # stop ffmpeg and replace this process, preserving its PID.
+                response = Response("Reloading", mimetype="text/plain")
+                response.call_on_close(self.reload_process)
+                return response
+            return self.execCmd(command)
 
         @app.route('/', methods=['GET'])
         @login_required

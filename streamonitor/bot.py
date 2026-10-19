@@ -114,13 +114,13 @@ class Bot(Thread):
         self.running = True
 
     def stop(self, a, b, thread_too=False):
+        if thread_too:
+            self.quitting = True
         if self.running:
             self.log("Stopping...")
             if self.stopDownload:
                 self.stopDownload()
             self.running = False
-        if thread_too:
-            self.quitting = True
 
     def getStatus(self):
         return Status.UNKNOWN
@@ -244,6 +244,8 @@ class Bot(Thread):
                                 self.logger.error(self.status())
                                 self._sleep(self.sleep_on_error)
                                 continue
+                            if self.quitting or not self.running:
+                                break
                             self.log('Started downloading show')
                             self.recording = True
                             file = self.genOutFilename()
